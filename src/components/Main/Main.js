@@ -7,13 +7,23 @@ export default class Main extends Component {
     text: sampleText
   };
 
+  editText = e => {
+    const text = e.target.value;
+    this.setState({ text });
+  };
+
   render() {
     const { text } = this.state;
     return (
       <main className={styles.main}>
         <div className={styles.editor}>
           <h2 className={styles.title}>Editor</h2>
-          <textarea className={styles.form} rows="35" value={text} />
+          <textarea
+            className={styles.form}
+            rows="35"
+            value={text}
+            onChange={e => this.editText(e)}
+          />
         </div>
 
         <div className={styles.preview}>
