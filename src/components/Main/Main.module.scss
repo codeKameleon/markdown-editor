@@ -1,0 +1,40 @@
+.main {
+  display: flex;
+  min-height: 100vh;
+}
+
+.editor,
+.preview {
+  padding: 80px 16px;
+}
+
+.editor {
+  flex: 1 1 auto;
+  background-color: #2d323d;
+  .title {
+    color: #fff;
+  }
+}
+
+.form {
+  width: 80%;
+}
+
+.preview {
+  flex: 1 1 auto;
+  background-color: #eee;
+  color: #333;
+}
+
+.textPreview {
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  padding: 80px 16px;
+  background-color: #5ccec2;
+}
