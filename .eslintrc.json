@@ -8,6 +8,7 @@
   "plugins": ["prettier"],
   "parser": "babel-eslint",
   "rules": {
+    "linebreak-style": 0,
     "comma-dangle": ["error", "never"],
     "semi": 0,
     "prettier/prettier": [
