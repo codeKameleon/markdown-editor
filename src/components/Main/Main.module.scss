@@ -5,6 +5,9 @@
 
 .editor,
 .preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 80px 16px;
 }
 
@@ -29,6 +32,7 @@
 .textPreview {
   max-width: 650px;
   margin: 0 auto;
+  word-break: break-word;
 }
 
 .actions {
@@ -37,4 +41,8 @@
   flex: 0 0 auto;
   padding: 80px 16px;
   background-color: #5ccec2;
+}
+
+.action {
+  margin: 10px 0;
 }
