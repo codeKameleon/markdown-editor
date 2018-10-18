@@ -4,11 +4,20 @@ import exampleText from '../../exampleText';
 import styles from './Main.module.scss';
 
 export default class Main extends Component {
-  state = {
-    text: exampleText
-  };
-
   // Lifecycle Methods
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      text: exampleText,
+      copied: false
+    };
+
+    this.textarea = React.createRef();
+    this.copyMessage = React.createRef();
+    this.copyText = this.copyText.bind(this);
+  }
+
   componentDidMount() {
     const localStorageText = localStorage.getItem('markdownText');
 
@@ -34,9 +43,38 @@ export default class Main extends Component {
     this.setState({ text });
   };
 
-  renderText = text => {
-    // sanitize option set to true avoids HTML being rendered
+  copyText() {
+    const textarea = this.textarea.current;
+
+    textarea.select();
+    document.execCommand('copy');
+
+    this.setState({ copied: true });
+    // Back to the default state to enable clicking again on the copy button
+    this.setDefaultCopyState = setTimeout(() => {
+      this.setState(() => ({ copied: false }));
+    }, 2000);
+  }
+
+  renderCopyMessage() {
+    const { copied } = this.state;
+
+    if (copied) {
+      return (
+        <div className={styles.copySuccess} ref={this.copyMessage}>
+          Copied !
+        </div>
+      );
+    }
+  }
+
+  renderHTML = text => {
+    /*
+      sanitize option set to true avoids HTML passed into markdownString
+      being rendered
+    */
     const previewText = marked(text, { sanitize: true });
+
     /*
       Pass this object to the dangerouslySetInnerHTML attribute
       Learn more in the official React doc => https://goo.gl/5MMzxi
@@ -47,6 +85,7 @@ export default class Main extends Component {
   // Component rendering
   render() {
     const { text } = this.state;
+
     return (
       <main className={styles.main}>
         <div className={styles.editor}>
@@ -57,14 +96,14 @@ export default class Main extends Component {
             rows="35"
             value={text}
             onChange={e => this.editText(e)}
+            ref={this.textarea}
           />
         </div>
 
         <div className={styles.preview}>
           <h2 className={styles.title}>Preview</h2>
-
           <div
-            dangerouslySetInnerHTML={this.renderText(text)}
+            dangerouslySetInnerHTML={this.renderHTML(text)}
             className={styles.textPreview}
           />
         </div>
@@ -78,10 +117,15 @@ export default class Main extends Component {
             Preview Mode
           </button>
 
-          <button className={styles.action} type="button">
+          <button
+            className={styles.action}
+            type="button"
+            onClick={this.copyText}
+          >
             Copy to clipboard
           </button>
         </div>
+        {this.renderCopyMessage()}
       </main>
     );
   }
