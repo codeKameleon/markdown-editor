@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import marked from 'marked';
+import { Form, TextArea, Button, Icon, Popup } from 'semantic-ui-react';
+import cn from 'classnames';
 import exampleText from '../../exampleText';
 import styles from './Main.module.scss';
 
@@ -10,15 +12,18 @@ export default class Main extends Component {
 
     this.state = {
       text: exampleText,
-      copied: false
+      copied: false,
+      editMode: true,
+      previewMode: false,
+      viewportWidth: window.innerWidth
     };
 
     this.textarea = React.createRef();
     this.copyMessage = React.createRef();
-    this.copyText = this.copyText.bind(this);
   }
 
   componentDidMount() {
+    window.addEventListener('resize', this.handleWindowSizeChange);
     const localStorageText = localStorage.getItem('markdownText');
 
     if (localStorageText) {
@@ -28,8 +33,12 @@ export default class Main extends Component {
 
   componentDidUpdate() {
     const { text } = this.state;
-    // localStorage enable storing data in the browser
+    // localStorage enables storing data in the browser
     localStorage.setItem('markdownText', text);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleWindowSizeChange);
   }
 
   // Component Functions
@@ -43,8 +52,8 @@ export default class Main extends Component {
     this.setState({ text });
   };
 
-  copyText() {
-    const textarea = this.textarea.current;
+  copyText = () => {
+    const textarea = this.textarea.current.ref;
 
     textarea.select();
     document.execCommand('copy');
@@ -54,7 +63,19 @@ export default class Main extends Component {
     this.setDefaultCopyState = setTimeout(() => {
       this.setState(() => ({ copied: false }));
     }, 2000);
-  }
+  };
+
+  handleWindowSizeChange = () => {
+    this.setState({ viewportWidth: window.innerWidth });
+  };
+
+  toggleMode = () => {
+    const { previewMode, editMode } = this.state;
+    this.setState({
+      previewMode: !previewMode,
+      editMode: !editMode
+    });
+  };
 
   renderCopyMessage() {
     const { copied } = this.state;
@@ -62,10 +83,87 @@ export default class Main extends Component {
     if (copied) {
       return (
         <div className={styles.copySuccess} ref={this.copyMessage}>
+          <Icon name="copy" size="large" />
           Copied !
         </div>
       );
     }
+  }
+
+  renderActions() {
+    const { editMode, previewMode, viewportWidth } = this.state;
+    const isMobile = viewportWidth <= 768;
+
+    // Edit Mode (mobile)
+    if (editMode && isMobile) {
+      return (
+        <div className={styles.actions}>
+          <Popup
+            trigger={
+              <Button
+                className={styles.action}
+                onClick={this.toggleMode}
+                circular
+                icon="eye"
+              />
+            }
+            position="left center"
+            content="Preview"
+          />
+
+          <Popup
+            trigger={
+              <Button
+                className={styles.action}
+                onClick={this.copyText}
+                circular
+                icon="copy"
+              />
+            }
+            position="left center"
+            content="Copy"
+          />
+        </div>
+      );
+    }
+
+    // Preview Mode (mobile)
+    if (previewMode && isMobile) {
+      return (
+        <div className={styles.actions}>
+          <Popup
+            trigger={
+              <Button
+                className={styles.action}
+                circular
+                icon="pencil"
+                onClick={this.toggleMode}
+              />
+            }
+            position="left center"
+            content="Edit"
+          />
+        </div>
+      );
+    }
+
+    // Default Mode (desktop)
+    return (
+      <div className={styles.actions}>
+        <Popup
+          trigger={
+            <Button
+              className={styles.action}
+              onClick={this.copyText}
+              circular
+              icon="copy"
+            />
+          }
+          position="left center"
+          content="Copy"
+        />
+      </div>
+    );
   }
 
   renderHTML = text => {
@@ -84,47 +182,38 @@ export default class Main extends Component {
 
   // Component rendering
   render() {
-    const { text } = this.state;
+    const { text, previewMode } = this.state;
 
     return (
       <main className={styles.main}>
         <div className={styles.editor}>
-          <h2 className={styles.title}>Editor</h2>
+          <div className={styles.headline}>
+            <h2 className={styles.title}>Editor</h2>
+          </div>
 
-          <textarea
-            className={styles.form}
-            rows="35"
-            value={text}
-            onChange={e => this.editText(e)}
-            ref={this.textarea}
-          />
+          <Form className={styles.form}>
+            <TextArea
+              className={styles.markdownEditor}
+              autoHeight
+              value={text}
+              onChange={e => this.editText(e)}
+              ref={this.textarea}
+            />
+          </Form>
         </div>
 
-        <div className={styles.preview}>
-          <h2 className={styles.title}>Preview</h2>
+        <div
+          className={cn(styles.preview, { [styles.showPreview]: previewMode })}
+        >
+          <div className={styles.headline}>
+            <h2 className={styles.title}>Preview</h2>
+          </div>
           <div
             dangerouslySetInnerHTML={this.renderHTML(text)}
-            className={styles.textPreview}
+            className={styles.htmlPreview}
           />
         </div>
-
-        <div className={styles.actions}>
-          <button className={styles.action} type="button">
-            Edition Mode
-          </button>
-
-          <button className={styles.action} type="button">
-            Preview Mode
-          </button>
-
-          <button
-            className={styles.action}
-            type="button"
-            onClick={this.copyText}
-          >
-            Copy to clipboard
-          </button>
-        </div>
+        {this.renderActions()}
         {this.renderCopyMessage()}
       </main>
     );

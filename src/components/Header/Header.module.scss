@@ -1,5 +1,6 @@
 .header {
   position: fixed;
+  z-index: 4;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -13,4 +14,9 @@
 .title {
   color: #2d323d;
   font-size: 1.125rem;
+  margin: 0;
+}
+
+.githubLink {
+  color: #2d323d;
 }
