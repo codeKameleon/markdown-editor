@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import marked from 'marked';
 import { Form, TextArea, Button, Icon, Popup } from 'semantic-ui-react';
 import cn from 'classnames';
+
 import exampleText from '../../exampleText';
 import styles from './Main.module.scss';
 
